@@ -1,6 +1,6 @@
 # Calculate Block
 
-A Tetris-style falling-block game where every block is a digit (`0-9`) or an
+A simple Tetris-style falling-block game where every block is a digit (`0-9`) or an
 operator (`+ - * % =`). Pieces fall as **1-4 block shapes** (single, domino,
 trominoes, tetrominoes) that you can **rotate**, and each cell carries its own
 character. Instead of clearing full rows, you clear blocks by forming
@@ -108,3 +108,6 @@ All audio is **synthesized at startup** — there are no audio asset files:
 
 Music pauses with the game (`P`) and stops/resumes with mute. If no audio device
 is available, the game runs silently. Press `M` to mute/unmute everything.
+
+## To do
+- **Add empty block as rock to separate the row to make game more difficult 
