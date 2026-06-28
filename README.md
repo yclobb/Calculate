@@ -110,4 +110,5 @@ Music pauses with the game (`P`) and stops/resumes with mute. If no audio device
 is available, the game runs silently. Press `M` to mute/unmute everything.
 
 ## To do
-- **Add empty block as rock to separate the row to make game more difficult 
+
+- **Add bracket** to separate the row to make game more difficult 
