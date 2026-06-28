@@ -643,8 +643,8 @@ class Game:
                     if len(vals) < 3:
                         continue
                     same = all(v == vals[0] for v in vals)
-                    asc = all(vals[i + 1] - vals[i] == 1 for i in range(3))
-                    desc = all(vals[i + 1] - vals[i] == -1 for i in range(3))
+                    asc = all(vals[i + 1] - vals[i] == 1 for i in range(2))
+                    desc = all(vals[i + 1] - vals[i] == -1 for i in range(2))
                     if same or asc or desc:
                         to_remove.update(cells)
 
