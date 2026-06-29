@@ -1,4 +1,6 @@
 # Calculate Block
+<img width="758" height="826" alt="image" src="https://github.com/user-attachments/assets/986df1b5-b542-4b34-a7c6-3a6cc7b04609" />
+
 # Motivation
 I havent built anything with pygame yet since I have only used gdscript, so I decided to make a game with pygame. I wanted my game to be somewhat original rather than copying an existing game, so I combined maths with tetris to form this game. I wanted to familiriaze myself with other languages to expand my "horizons".
 
