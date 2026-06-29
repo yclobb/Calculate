@@ -10,8 +10,6 @@ log = logging.getLogger("calculate_game")
 
 
 def setup_logging():
-    DEBUG-level detail to calculate_game.log; otherwise only INFO and above go to
-    the console."""
     if log.handlers:
         return
     debug = bool(os.environ.get("CALC_DEBUG"))
