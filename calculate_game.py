@@ -1,33 +1,3 @@
-"""Tetris-style falling-block game where every block is a digit (0-9) or
-operator (+, -, *, %, =). Pieces fall as 1-4 block shapes (single, domino,
-trominoes, tetrominoes); each cell carries its own character, and the shape can
-be rotated.
-
-Clearing rules:
-- Within each contiguous run of filled cells, every '=' forms an equation
-  between the segment to its left and the one to its right (gaps split a row into
-  independent runs). If any equation in a row is satisfied, the WHOLE row is
-  removed and the rows above drop down. Credit for the row is the sum of all its
-  number cells' values.
-- After row clears, orthogonally adjacent operators (+ - * % =) are cleared: a
-  straight run vanishes in greedy pairs (+1 each), while a connected cluster that
-  bends (an operator with both a horizontal and a vertical operator neighbor) is
-  removed entirely (+N-1). Blocks above then fall down. (Equations clear first,
-  so valid '=' equations aren't pre-empted.)
-- Any straight run of 4 number cells (horizontal, vertical, or either diagonal)
-  whose digits are all identical OR form 4 consecutive integers (ascending or
-  descending) is removed; the blocks above fall down to fill the gaps, crediting
-  the player with (sum of the removed digits) + 100.
-- All gravity-based removals (number runs and operator pairs) cascade: blocks
-  that fall into place can trigger further removals until nothing more clears.
-
-Leveling is score-driven: reaching the next threshold (level 2 at 5000, level 3
-at 10000, i.e. (level-1)*5000) auto-levels-up. Each level-up banks every
-on-screen number into the score, clears the whole board, and narrows the width
-by one. The playfield starts at width 10 (MAX_WIDTH) and narrows down to a floor
-of MIN_WIDTH (4) as levels rise.
-"""
-
 import array
 import logging
 import math
@@ -40,7 +10,6 @@ log = logging.getLogger("calculate_game")
 
 
 def setup_logging():
-    """Configure the debug logger. Set the CALC_DEBUG environment variable to log
     DEBUG-level detail to calculate_game.log; otherwise only INFO and above go to
     the console."""
     if log.handlers:
@@ -63,8 +32,8 @@ CELL = 32
 FRAME = 16
 HUD_W = 6 * CELL
 
-MIN_WIDTH = 4   # narrowest the board may get (floor for level-up narrowing)
-MAX_WIDTH = 10  # starting width; each level-up narrows by 1 down to MIN_WIDTH
+MIN_WIDTH = 4   
+MAX_WIDTH = 10  
 
 BG = (18, 18, 24)
 FRAME_COLOR = (90, 90, 110)
@@ -84,19 +53,14 @@ MIN_FALL_MS = 90
 SOFT_DROP_MS = 50
 
 
-# Score thresholds for automatic level-ups: level 2 at 5000, level 3 at 10000,
-# i.e. (level - 1) * LEVEL_STEP_POINTS.
 LEVEL_STEP_POINTS = 5000
 
 
 def score_for_level(level):
-    """Total score required to reach the given level."""
     return (level - 1) * LEVEL_STEP_POINTS
 
 
 def width_for_level(level):
-    """Board width at the given level: starts at MAX_WIDTH and narrows by 1 per
-    level, never below MIN_WIDTH."""
     return max(MIN_WIDTH, MAX_WIDTH - (level - 1))
 
 
@@ -106,23 +70,21 @@ def make_piece(char):
     return {"char": char, "kind": "eq" if char == "=" else "op"}
 
 
-# Falling-piece shapes as lists of (row, col) cell offsets (normalized so the
-# minimum row and col are 0). Sizes range from a single block up to tetrominoes.
 SHAPES = [
-    [(0, 0)],                              # single
-    [(0, 0), (0, 1)],                      # domino
-    [(0, 0), (0, 1), (0, 2)],              # I3
-    [(0, 0), (1, 0), (1, 1)],              # L3
-    [(0, 0), (0, 1), (1, 0), (1, 1)],      # O
-    [(0, 0), (0, 1), (0, 2), (0, 3)],      # I4
-    [(0, 0), (0, 1), (0, 2), (1, 1)],      # T
-    [(0, 1), (0, 2), (1, 0), (1, 1)],      # S
-    [(0, 0), (0, 1), (1, 1), (1, 2)],      # Z
-    [(0, 0), (1, 0), (2, 0), (2, 1)],      # L
-    [(0, 1), (1, 1), (2, 1), (2, 0)],      # J
+    [(0, 0)],                             
+    [(0, 0), (0, 1)],                    
+    [(0, 0), (0, 1), (0, 2)],              
+    [(0, 0), (1, 0), (1, 1)],              
+    [(0, 0), (0, 1), (1, 0), (1, 1)],      
+    [(0, 0), (0, 1), (0, 2), (0, 3)],     
+    [(0, 0), (0, 1), (0, 2), (1, 1)],     
+    [(0, 1), (0, 2), (1, 0), (1, 1)],      
+    [(0, 0), (0, 1), (1, 1), (1, 2)],      
+    [(0, 0), (1, 0), (2, 0), (2, 1)],     
+    [(0, 1), (1, 1), (2, 1), (2, 0)],      
 ]
 
-EQUALS_PER_BAG = 2  # how many '=' are guaranteed per `width` blocks
+EQUALS_PER_BAG = 2 
 
 def make_bag(width):
     """A shuffled batch of `width` pieces split evenly between operators and
@@ -141,9 +103,6 @@ SAMPLE_RATE = 44100
 
 
 def synth_sound(notes, total_ms=None, volume=0.4):
-    """Build a pygame Sound from a list of (frequency_hz, start_ms, duration_ms)
-    notes, mixed together. Each note is a sine tone with a soft attack and linear
-    decay. Returns None if the mixer isn't available."""
     if pygame.mixer.get_init() is None:
         return None
     if total_ms is None:
@@ -158,7 +117,7 @@ def synth_sound(notes, total_ms=None, volume=0.4):
             idx = s0 + i
             if idx >= n:
                 break
-            env = 1.0 - i / cnt                       # linear decay
+            env = 1.0 - i / cnt                       
             atk = min(1.0, i / attack) if attack else 1.0
             samples[idx] += math.sin(2 * math.pi * freq * i / SAMPLE_RATE) * env * atk
     buf = array.array("h")
@@ -166,18 +125,15 @@ def synth_sound(notes, total_ms=None, volume=0.4):
     for v in samples:
         clamped = max(-1.0, min(1.0, v))
         iv = int(amp * clamped)
-        buf.append(iv)   # left channel
-        buf.append(iv)   # right channel (stereo)
+        buf.append(iv)   
+        buf.append(iv)   
     return pygame.mixer.Sound(buffer=buf.tobytes())
 
 
 def make_music_notes():
-    """A short, loopable chiptune phrase in A-minor: a plucky lead line over a
-    slower bass. Returned as (frequency, start_ms, duration_ms) notes for
-    synth_sound; the whole thing loops seamlessly."""
-    beat = 360  # ms per lead note
-    lead = [440, 523, 659, 523, 587, 494, 392, 494]   # A4 C5 E5 C5 D5 B4 G4 B4
-    bass = [110, 87, 98, 82]                           # A2 F2 G2 E2 (one per 2 beats)
+    beat = 360 
+    lead = [440, 523, 659, 523, 587, 494, 392, 494] 
+    bass = [110, 87, 98, 82]                           
     notes = []
     for i, freq in enumerate(lead):
         notes.append((freq, i * beat, beat - 20))
@@ -187,9 +143,6 @@ def make_music_notes():
 
 
 class SoundBank:
-    """Synthesizes and plays the game's sound effects and looping background
-    music. Degrades to a silent no-op if the audio device or mixer is
-    unavailable."""
 
     def __init__(self):
         self.enabled = pygame.mixer.get_init() is not None
@@ -199,7 +152,6 @@ class SoundBank:
         self.music_channel = None
         if not self.enabled:
             return
-        # (frequency, start_ms, duration_ms) note lists per effect.
         specs = {
             "move":     ([(330, 0, 25)], 0.18),
             "drop":     ([(440, 0, 40), (220, 35, 70)], 0.30),
@@ -215,8 +167,6 @@ class SoundBank:
                 self.sounds[name] = synth_sound(notes, volume=vol)
             except (pygame.error, ValueError):
                 self.sounds[name] = None
-
-        # Reserve channel 0 for music so sound effects never cut it off.
         try:
             pygame.mixer.set_num_channels(16)
             pygame.mixer.set_reserved(1)
@@ -252,7 +202,7 @@ class SoundBank:
     def toggle_mute(self):
         self.muted = not self.muted
         if self.muted:
-            pygame.mixer.stop()  # silences effects and music
+            pygame.mixer.stop() 
         else:
             self.start_music()
         return self.muted
@@ -439,8 +389,6 @@ class Game:
             self.spawn()
 
     def clear_rows(self):
-        # All removals are gravity-based and cascade: each one drops blocks down,
-        # which may line up new matches, so repeat until nothing more clears.
         messages = []
         while True:
             eq_message = self.remove_equations()
@@ -533,14 +481,6 @@ class Game:
         return False
 
     def remove_operator_pairs(self):
-        """Orthogonally adjacent operators (+ - * % =) are cleared. A connected
-        operator cluster that bends — i.e. some operator has BOTH a horizontal and
-        a vertical operator neighbor — is removed entirely. A purely straight run
-        is cleared in greedy pairs (a leftover odd one stays). Each cleared pair,
-        and each cluster of N, credits N-1 points; blocks above then fall down.
-        (Equations clear first in the cascade, so valid '=' equations aren't
-        pre-empted.)"""
-        op_chars = set("+-*%=")  # all operators participate, including '='
 
         def is_op(orow, ocol):
             cell = self.grid[orow][ocol]
@@ -580,7 +520,7 @@ class Game:
                     credit += len(comp) - 1
                     cluster_count += 1
                 else:
-                    ordered = sorted(comp)  # along the straight run
+                    ordered = sorted(comp)  
                     for i in range(0, len(ordered) - 1, 2):
                         removed.add(ordered[i])
                         removed.add(ordered[i + 1])
@@ -679,19 +619,12 @@ class Game:
                 self.grid[r][c] = stack[r - empty] if r >= empty else None
 
     def maybe_level_up(self):
-        """Auto level-up whenever the score reaches the next level's threshold
-        (level 2 at 5000, level 3 at 10000, ...). May advance several levels at
-        once if a big bonus crossed multiple thresholds."""
         if self.game_over or self.paused:
             return
         while self.score >= score_for_level(self.level + 1):
             self.level_up()
 
     def level_up(self):
-        """Advance one level: bank every on-screen number into the score, clear
-        the whole board, narrow the width by one (down to MIN_WIDTH), and speed
-        up the fall."""
-        # Bank all on-screen numbers before clearing.
         bonus = sum(int(cell["char"]) for row in self.grid for cell in row
                     if cell is not None and cell["kind"] == "num")
 
