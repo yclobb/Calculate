@@ -4,6 +4,9 @@ I havent built anything with pygame yet since I have only used gdscript, so I de
 
 Built with [pygame](https://www.pygame.org/).
 
+- BUGS
+- slight music shenanigans
+- sometimes blocks incorrectly recognise as a combo
 ## Requirements
 
 - Python 3.8+
